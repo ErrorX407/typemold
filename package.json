@@ -1,6 +1,6 @@
 {
   "name": "typemold",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight, high-performance object mapper for TypeScript and Node.js with runtime field projection",
   "author": {
     "name": "Chetan Joshi",
