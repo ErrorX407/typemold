@@ -1,15 +1,15 @@
 # typemold
 
-A **lightweight**, **high-performance** object mapper for NestJS with runtime field projection.
+A **lightweight**, **high-performance** object mapper for TypeScript & Node.js with runtime field projection.
 
-[![npm version](https://badge.fury.io/js/%40sevirial%2Fnest-mapper.svg)](https://www.npmjs.com/package/typemold)
+[![npm version](https://img.shields.io/npm/v/typemold.svg)](https://www.npmjs.com/package/typemold)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Features
 
 - ⚡ **High Performance** - Compiled mappers cached after first use (no runtime reflection)
 - 🎯 **Runtime Field Projection** - Pick/omit fields without creating multiple DTOs
-- 📦 **Lightweight** - < 5KB bundle, zero production dependencies
+- 📦 **Lightweight** - ~3KB gzipped, zero runtime dependencies
 - 🏷️ **Field Groups** - Define reusable field sets with decorators
 - 🔧 **NestJS Integration** - Full module support with DI
 - ✅ **TypeScript First** - Full strict mode support
@@ -200,11 +200,11 @@ export class UserService {
 
 Thanks to compiled & cached mappers, performance is near-identical to hand-written mapping code:
 
-| Operation    | typemold | @automapper/nestjs | Manual   |
-| ------------ | --------------------- | ------------------ | -------- |
-| Single map   | ~0.002ms              | ~0.05ms            | ~0.001ms |
-| Array (1000) | ~1.5ms                | ~40ms              | ~1ms     |
-| Memory       | O(1) cache            | O(n) profiles      | None     |
+| Operation    | typemold   | @automapper/nestjs | Manual   |
+| ------------ | ---------- | ------------------ | -------- |
+| Single map   | ~0.002ms   | ~0.05ms            | ~0.001ms |
+| Array (1000) | ~1.5ms     | ~40ms              | ~1ms     |
+| Memory       | O(1) cache | O(n) profiles      | None     |
 
 ## API Reference
 
@@ -232,4 +232,4 @@ interface MapOptions<T> {
 
 ## License
 
-MIT © [Sevirial](https://sevirial.com)
+MIT © [Chetan Joshi](https://github.com/ErrorX407)
