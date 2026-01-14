@@ -1,5 +1,5 @@
 /**
- * @sevirial/nest-mapper - NestJS MapperService
+ * typemold - NestJS MapperService
  * Injectable service for NestJS dependency injection
  */
 
@@ -83,7 +83,7 @@ export class MapperService {
       this.validator = await import("class-validator");
     } catch {
       console.warn(
-        "[@sevirial/nest-mapper] class-validator not found. Validation will be skipped."
+        "[typemold] class-validator not found. Validation will be skipped."
       );
     }
   }

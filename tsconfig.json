@@ -18,6 +18,6 @@
       "typemold": ["./src/index.ts"]
     }
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*", "tests/**/*", "examples/**/*"],
   "exclude": ["node_modules", "dist"]
 }

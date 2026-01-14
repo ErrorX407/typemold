@@ -1,5 +1,5 @@
 /**
- * @sevirial/nest-mapper - Core Mapper
+ * typemold - Core Mapper
  * Main mapper class with static methods for easy usage
  */
 

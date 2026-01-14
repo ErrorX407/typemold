@@ -1,5 +1,5 @@
 /**
- * @sevirial/nest-mapper - Utility Functions
+ * typemold - Utility Functions
  * Helper functions for the mapping engine
  */
 

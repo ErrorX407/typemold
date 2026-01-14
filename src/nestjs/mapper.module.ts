@@ -1,5 +1,5 @@
 /**
- * @sevirial/nest-mapper - NestJS MapperModule
+ * typemold - NestJS MapperModule
  * Dynamic module for NestJS integration
  */
 
@@ -56,7 +56,7 @@ export interface MapperModuleAsyncOptions {
 }
 
 /**
- * NestJS Module for @sevirial/nest-mapper
+ * NestJS Module for typemold
  *
  * @example
  * // Basic usage (global by default)

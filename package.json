@@ -1,6 +1,6 @@
 {
   "name": "typemold",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A lightweight, high-performance object mapper for TypeScript and Node.js with runtime field projection",
   "author": {
     "name": "Chetan Joshi",
@@ -16,6 +16,11 @@
       "require": "./dist/cjs/index.js",
       "import": "./dist/esm/index.js",
       "types": "./dist/types/index.d.ts"
+    },
+    "./nestjs": {
+      "require": "./dist/cjs/nestjs/index.js",
+      "import": "./dist/esm/nestjs/index.js",
+      "types": "./dist/types/nestjs/index.d.ts"
     }
   },
   "files": [

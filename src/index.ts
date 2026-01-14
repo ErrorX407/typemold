@@ -29,8 +29,8 @@
  * const public = Mapper.map(user, UserDto, { group: 'public' });
  *
  * @example
- * // NestJS integration (optional)
- * import { MapperModule, MapperService } from 'typemold';
+ * // NestJS integration (import from 'typemold/nestjs')
+ * import { MapperModule, MapperService } from 'typemold/nestjs';
  *
  * @Module({
  *   imports: [MapperModule.forRoot()],
@@ -82,12 +82,5 @@ export {
   isClassInstance,
 } from "./utils";
 
-// NestJS Integration
-export {
-  MapperModule,
-  MapperModuleOptions,
-  MapperModuleAsyncOptions,
-  MapperService,
-  MapperServiceOptions,
-  MAPPER_OPTIONS,
-} from "./nestjs";
+// NOTE: NestJS integration is available via 'typemold/nestjs' subpath
+// import { MapperModule, MapperService } from 'typemold/nestjs';

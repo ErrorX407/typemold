@@ -1,5 +1,5 @@
 /**
- * @sevirial/nest-mapper - Mapping Registry
+ * typemold - Mapping Registry
  * Singleton registry for storing and caching mapping configurations
  */
 

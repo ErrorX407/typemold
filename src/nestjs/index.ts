@@ -1,5 +1,5 @@
 /**
- * @sevirial/nest-mapper - NestJS Integration
+ * typemold - NestJS Integration
  * Re-exports for NestJS-specific functionality
  */
 

@@ -1,5 +1,5 @@
 /**
- * @sevirial/nest-mapper - Core Mapper Tests
+ * typemold - Core Mapper Tests
  */
 
 import "reflect-metadata";

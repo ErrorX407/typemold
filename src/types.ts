@@ -1,5 +1,5 @@
 /**
- * @sevirial/nest-mapper - Type Definitions
+ * typemold - Type Definitions
  * Core types for the high-performance object mapper
  */
 

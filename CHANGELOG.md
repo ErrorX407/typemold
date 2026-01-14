@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Initial release of @sevirial/nest-mapper
+- Initial release of typemold
 - Core `Mapper` class with `map()`, `mapArray()`, `pick()`, `omit()`, `group()` methods
 - Decorators: `@MapFrom()`, `@AutoMap()`, `@FieldGroup()`, `@Ignore()`, `@NestedType()`
 - Runtime field projection with pick/omit options

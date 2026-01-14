@@ -1,5 +1,5 @@
 /**
- * @sevirial/nest-mapper - Decorators
+ * typemold - Decorators
  * Property decorators for defining mapping configurations
  */
 
