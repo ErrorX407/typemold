@@ -4,6 +4,7 @@ A **lightweight**, **high-performance** object mapper for TypeScript & Node.js w
 
 [![npm version](https://img.shields.io/npm/v/typemold.svg)](https://www.npmjs.com/package/typemold)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Downloads](https://img.shields.io/npm/dm/typemold.svg)](https://www.npmjs.com/package/typemold)
 
 ## Features
 
@@ -11,20 +12,46 @@ A **lightweight**, **high-performance** object mapper for TypeScript & Node.js w
 - 🎯 **Runtime Field Projection** - Pick/omit fields without creating multiple DTOs
 - 📦 **Lightweight** - ~3KB gzipped, zero runtime dependencies
 - 🏷️ **Field Groups** - Define reusable field sets with decorators
-- 🔧 **NestJS Integration** - Full module support with DI
+- 🔧 **NestJS Integration** - Full module support with DI (separate import)
 - ✅ **TypeScript First** - Full strict mode support
 - 🔄 **Hybrid Validation** - Optional class-validator integration
 
-## Installation
+---
+
+## 📦 Installation
+
+### Node.js / Express / Fastify
 
 ```bash
-npm install typemold
-
-# Peer dependency (already in NestJS projects)
-npm install reflect-metadata
+npm install typemold reflect-metadata
 ```
 
-## Quick Start
+```typescript
+// Usage
+import { Mapper, AutoMap, MapFrom } from "typemold";
+```
+
+---
+
+### NestJS
+
+```bash
+npm install typemold reflect-metadata
+```
+
+```typescript
+// Core decorators & Mapper
+import { Mapper, AutoMap, MapFrom } from "typemold";
+
+// NestJS module & service (separate subpath)
+import { MapperModule, MapperService } from "typemold/nestjs";
+```
+
+> **Note:** NestJS integration requires `@nestjs/common` and `@nestjs/core` (usually already installed in NestJS projects).
+
+---
+
+## 🚀 Quick Start
 
 ### 1. Define Your DTO
 
@@ -58,7 +85,9 @@ const userDto = Mapper.map(userEntity, UserDto);
 const userDtos = Mapper.mapArray(users, UserDto);
 ```
 
-## Runtime Field Projection ⭐
+---
+
+## ⭐ Runtime Field Projection
 
 **The killer feature** - reuse a single DTO across multiple endpoints:
 
@@ -67,7 +96,7 @@ const userDtos = Mapper.mapArray(users, UserDto);
 Mapper.map(user, UserDto);
 // Result: { username, avatarUrl, isAdult, email }
 
-// Only username and avatar (shorthand)
+// Only username and avatar
 Mapper.pick(user, UserDto, ["username", "avatarUrl"]);
 // Result: { username, avatarUrl }
 
@@ -80,7 +109,9 @@ Mapper.map(user, UserDto, { pick: ["username", "avatarUrl"] });
 Mapper.map(user, UserDto, { omit: ["email"] });
 ```
 
-## Field Groups
+---
+
+## 🏷️ Field Groups
 
 Define reusable field sets:
 
@@ -107,12 +138,11 @@ class UserDto {
 Mapper.group(user, UserDto, "minimal"); // { username, avatar }
 Mapper.group(user, UserDto, "public"); // { username, avatar, bio }
 Mapper.group(user, UserDto, "full"); // { bio, email }
-
-// Or via options
-Mapper.map(user, UserDto, { group: "minimal" });
 ```
 
-## Decorators
+---
+
+## 🎨 Decorators
 
 | Decorator                 | Description                  | Example                                          |
 | ------------------------- | ---------------------------- | ------------------------------------------------ |
@@ -123,46 +153,20 @@ Mapper.map(user, UserDto, { group: "minimal" });
 | `@Ignore()`               | Skips property               | `@Ignore() internalId: string`                   |
 | `@NestedType(() => Type)` | Nested object mapping        | `@NestedType(() => AddressDto)`                  |
 
-## NestJS Integration
+---
 
-### Basic Setup
+## 🔧 NestJS Integration
+
+> Import from `typemold/nestjs`
+
+### Setup
 
 ```typescript
 import { Module } from "@nestjs/common";
-import { MapperModule } from "typemold";
+import { MapperModule } from "typemold/nestjs";
 
 @Module({
-  imports: [MapperModule.forRoot()], // Global by default
-})
-export class AppModule {}
-```
-
-### With Validation
-
-```typescript
-@Module({
-  imports: [
-    MapperModule.forRoot({
-      enableValidation: true, // Uses class-validator if installed
-    }),
-  ],
-})
-export class AppModule {}
-```
-
-### Async Configuration
-
-```typescript
-@Module({
-  imports: [
-    MapperModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
-        enableValidation: config.get("ENABLE_VALIDATION"),
-      }),
-      inject: [ConfigService],
-    }),
-  ],
+  imports: [MapperModule.forRoot()],
 })
 export class AppModule {}
 ```
@@ -171,7 +175,7 @@ export class AppModule {}
 
 ```typescript
 import { Injectable } from "@nestjs/common";
-import { MapperService } from "typemold";
+import { MapperService } from "typemold/nestjs";
 
 @Injectable()
 export class UserService {
@@ -182,23 +186,28 @@ export class UserService {
     return this.mapper.map(user, UserDto);
   }
 
-  async getUserMinimal(id: string): Promise<Partial<UserDto>> {
+  async getUserMinimal(id: string) {
     const user = await this.userRepo.findOne(id);
     return this.mapper.group(user, UserDto, "minimal");
-  }
-
-  async getPostAuthor(
-    postId: string
-  ): Promise<Pick<UserDto, "username" | "avatar">> {
-    const user = await this.getPostUser(postId);
-    return this.mapper.pick(user, UserDto, ["username", "avatar"]);
   }
 }
 ```
 
-## Performance
+### Async Configuration
 
-Thanks to compiled & cached mappers, performance is near-identical to hand-written mapping code:
+```typescript
+MapperModule.forRootAsync({
+  imports: [ConfigModule],
+  useFactory: (config: ConfigService) => ({
+    enableValidation: config.get("ENABLE_VALIDATION"),
+  }),
+  inject: [ConfigService],
+});
+```
+
+---
+
+## ⚡ Performance
 
 | Operation    | typemold   | @automapper/nestjs | Manual   |
 | ------------ | ---------- | ------------------ | -------- |
@@ -206,7 +215,9 @@ Thanks to compiled & cached mappers, performance is near-identical to hand-writt
 | Array (1000) | ~1.5ms     | ~40ms              | ~1ms     |
 | Memory       | O(1) cache | O(n) profiles      | None     |
 
-## API Reference
+---
+
+## 📚 API Reference
 
 ### Mapper (Static)
 
@@ -216,7 +227,7 @@ Mapper.mapArray(sources, TargetDto, options?)
 Mapper.pick(source, TargetDto, ['field1', 'field2'])
 Mapper.omit(source, TargetDto, ['field1'])
 Mapper.group(source, TargetDto, 'groupName')
-Mapper.createMapper(TargetDto, options?) // Returns reusable function
+Mapper.createMapper(TargetDto, options?)
 ```
 
 ### MapOptions
@@ -229,6 +240,8 @@ interface MapOptions<T> {
   extras?: Record<string, unknown>; // Extra context for transforms
 }
 ```
+
+---
 
 ## License
 
