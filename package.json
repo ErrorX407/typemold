@@ -1,6 +1,6 @@
 {
   "name": "typemold",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "A lightweight, high-performance object mapper for TypeScript and Node.js with runtime field projection",
   "author": {
     "name": "Chetan Joshi",
@@ -60,9 +60,9 @@
   },
   "homepage": "https://github.com/ErrorX407/typemold#readme",
   "peerDependencies": {
-    "reflect-metadata": "^0.1.13 || ^0.2.0",
     "@nestjs/common": ">=9.0.0",
-    "@nestjs/core": ">=9.0.0"
+    "@nestjs/core": ">=9.0.0",
+    "reflect-metadata": "^0.1.13 || ^0.2.0"
   },
   "peerDependenciesMeta": {
     "@nestjs/common": {
