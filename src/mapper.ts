@@ -1,5 +1,5 @@
 /**
- * typemold - Core Mapper
+ * tmapper - Core Mapper
  * Main mapper class with static methods for easy usage
  */
 
@@ -48,7 +48,7 @@ export class Mapper {
   static map<TSource, TTarget>(
     source: TSource,
     targetType: Constructor<TTarget>,
-    options?: MapOptions<TTarget>
+    options?: MapOptions<TTarget>,
   ): TTarget {
     if (source == null) {
       return null as unknown as TTarget;
@@ -56,7 +56,7 @@ export class Mapper {
 
     const mapper = MapperFactory.createMapper<TSource, TTarget>(
       targetType,
-      options
+      options,
     );
     const context: MappingContext = {
       ...this.globalContext,
@@ -79,7 +79,7 @@ export class Mapper {
   static mapArray<TSource, TTarget>(
     sources: TSource[],
     targetType: Constructor<TTarget>,
-    options?: MapOptions<TTarget>
+    options?: MapOptions<TTarget>,
   ): TTarget[] {
     if (!sources || !Array.isArray(sources)) {
       return [];
@@ -87,7 +87,7 @@ export class Mapper {
 
     const mapper = MapperFactory.createMapper<TSource, TTarget>(
       targetType,
-      options
+      options,
     );
     const context: MappingContext = {
       ...this.globalContext,
@@ -116,7 +116,7 @@ export class Mapper {
   static pick<TSource, TTarget, K extends keyof TTarget>(
     source: TSource,
     targetType: Constructor<TTarget>,
-    fields: K[]
+    fields: K[],
   ): Pick<TTarget, K> {
     return this.map(source, targetType, {
       pick: fields as (keyof TTarget)[],
@@ -132,7 +132,7 @@ export class Mapper {
   static omit<TSource, TTarget, K extends keyof TTarget>(
     source: TSource,
     targetType: Constructor<TTarget>,
-    fields: K[]
+    fields: K[],
   ): Omit<TTarget, K> {
     return this.map(source, targetType, {
       omit: fields as (keyof TTarget)[],
@@ -148,7 +148,7 @@ export class Mapper {
   static group<TSource, TTarget>(
     source: TSource,
     targetType: Constructor<TTarget>,
-    groupName: string
+    groupName: string,
   ): Partial<TTarget> {
     return this.map(source, targetType, { group: groupName });
   }
@@ -162,11 +162,11 @@ export class Mapper {
    */
   static createMapper<TSource, TTarget>(
     targetType: Constructor<TTarget>,
-    options?: MapOptions<TTarget>
+    options?: MapOptions<TTarget>,
   ): (source: TSource) => TTarget {
     const compiledMapper = MapperFactory.createMapper<TSource, TTarget>(
       targetType,
-      options
+      options,
     );
     const context: MappingContext = {
       ...this.globalContext,
@@ -180,7 +180,7 @@ export class Mapper {
    * Registers a type converter for automatic type transformations
    */
   static registerConverter<TSource, TTarget>(
-    converter: TypeConverter<TSource, TTarget>
+    converter: TypeConverter<TSource, TTarget>,
   ): void {
     this.typeConverters.push(converter);
   }
@@ -204,12 +204,12 @@ export class Mapper {
    */
   static getCompiledMapper<TSource, TTarget>(
     targetType: Constructor<TTarget>,
-    options?: MapOptions<TTarget>
+    options?: MapOptions<TTarget>,
   ): CompiledMapper<TSource, TTarget> | undefined {
     const optionsKey = MappingRegistry.getOptionsKey(options);
     return MappingRegistry.getCompiledMapper<TSource, TTarget>(
       targetType,
-      optionsKey
+      optionsKey,
     );
   }
 }

@@ -1,5 +1,5 @@
 /**
- * typemold - Type Definitions
+ * tmapper - Type Definitions
  * Core types for the high-performance object mapper
  */
 
@@ -13,7 +13,7 @@ export type Constructor<T = any> = new (...args: any[]) => T;
  */
 export type TransformFn<TSource = any, TResult = any> = (
   source: TSource,
-  context?: MappingContext
+  context?: MappingContext,
 ) => TResult;
 
 /**
@@ -42,7 +42,7 @@ export interface PropertyMappingConfig {
  */
 export type CompiledMapper<TSource = any, TTarget = any> = (
   source: TSource,
-  context?: MappingContext
+  context?: MappingContext,
 ) => TTarget;
 
 /**

@@ -1,5 +1,5 @@
 {
-  "name": "typemold",
+  "name": "tmapper",
   "version": "2.0.0",
   "description": "A lightweight, high-performance object mapper for TypeScript and Node.js with runtime field projection",
   "author": {
@@ -53,12 +53,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ErrorX407/typemold.git"
+    "url": "git+https://github.com/ErrorX407/tmapper.git"
   },
   "bugs": {
-    "url": "https://github.com/ErrorX407/typemold/issues"
+    "url": "https://github.com/ErrorX407/tmapper/issues"
   },
-  "homepage": "https://github.com/ErrorX407/typemold#readme",
+  "homepage": "https://github.com/ErrorX407/tmapper#readme",
   "peerDependencies": {
     "@nestjs/common": ">=9.0.0",
     "@nestjs/core": ">=9.0.0",

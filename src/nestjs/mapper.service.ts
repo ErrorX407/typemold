@@ -1,5 +1,5 @@
 /**
- * typemold - NestJS MapperService
+ * tmapper - NestJS MapperService
  * Injectable service for NestJS dependency injection
  */
 
@@ -53,7 +53,7 @@ export class MapperService {
     null;
 
   constructor(
-    @Optional() @Inject(MAPPER_OPTIONS) options?: MapperServiceOptions
+    @Optional() @Inject(MAPPER_OPTIONS) options?: MapperServiceOptions,
   ) {
     this.options = options || {};
 
@@ -83,7 +83,7 @@ export class MapperService {
       this.validator = await import("class-validator");
     } catch {
       console.warn(
-        "[typemold] class-validator not found. Validation will be skipped."
+        "[tmapper] class-validator not found. Validation will be skipped.",
       );
     }
   }
@@ -94,7 +94,7 @@ export class MapperService {
   map<TSource, TTarget>(
     source: TSource,
     targetType: Constructor<TTarget>,
-    options?: MapOptions<TTarget>
+    options?: MapOptions<TTarget>,
   ): TTarget {
     return Mapper.map(source, targetType, options);
   }
@@ -105,7 +105,7 @@ export class MapperService {
   mapArray<TSource, TTarget>(
     sources: TSource[],
     targetType: Constructor<TTarget>,
-    options?: MapOptions<TTarget>
+    options?: MapOptions<TTarget>,
   ): TTarget[] {
     return Mapper.mapArray(sources, targetType, options);
   }
@@ -118,7 +118,7 @@ export class MapperService {
   async mapAndValidate<TSource, TTarget extends object>(
     source: TSource,
     targetType: Constructor<TTarget>,
-    options?: MapOptions<TTarget>
+    options?: MapOptions<TTarget>,
   ): Promise<TTarget> {
     const result = this.map(source, targetType, options);
 
@@ -138,7 +138,7 @@ export class MapperService {
   pick<TSource, TTarget, K extends keyof TTarget>(
     source: TSource,
     targetType: Constructor<TTarget>,
-    fields: K[]
+    fields: K[],
   ): Pick<TTarget, K> {
     return Mapper.pick(source, targetType, fields);
   }
@@ -149,7 +149,7 @@ export class MapperService {
   omit<TSource, TTarget, K extends keyof TTarget>(
     source: TSource,
     targetType: Constructor<TTarget>,
-    fields: K[]
+    fields: K[],
   ): Omit<TTarget, K> {
     return Mapper.omit(source, targetType, fields);
   }
@@ -160,7 +160,7 @@ export class MapperService {
   group<TSource, TTarget>(
     source: TSource,
     targetType: Constructor<TTarget>,
-    groupName: string
+    groupName: string,
   ): Partial<TTarget> {
     return Mapper.group(source, targetType, groupName);
   }
@@ -170,7 +170,7 @@ export class MapperService {
    */
   createMapper<TSource, TTarget>(
     targetType: Constructor<TTarget>,
-    options?: MapOptions<TTarget>
+    options?: MapOptions<TTarget>,
   ): (source: TSource) => TTarget {
     return Mapper.createMapper(targetType, options);
   }
