@@ -1,5 +1,5 @@
 /**
- * typemold - Utility Functions
+ * tmapper - Utility Functions
  * Helper functions for the mapping engine
  */
 
@@ -17,7 +17,7 @@ const BLOCKED_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 
 export function getNestedValue<T = unknown>(
   obj: Record<string, unknown> | null | undefined,
-  path: string
+  path: string,
 ): T | undefined {
   if (obj == null) return undefined;
 
@@ -49,7 +49,7 @@ export function getNestedValue<T = unknown>(
  * Checks if a value is a plain object (not an array, Date, etc.)
  */
 export function isPlainObject(
-  value: unknown
+  value: unknown,
 ): value is Record<string, unknown> {
   if (value === null || typeof value !== "object") return false;
   const proto = Object.getPrototypeOf(value);
@@ -70,7 +70,7 @@ export function isClassInstance(value: unknown): boolean {
  */
 export function pickKeys<T extends Record<string, unknown>>(
   obj: T,
-  keys: (keyof T)[]
+  keys: (keyof T)[],
 ): Partial<T> {
   const result: Partial<T> = {};
   for (const key of keys) {
@@ -86,7 +86,7 @@ export function pickKeys<T extends Record<string, unknown>>(
  */
 export function omitKeys<T extends Record<string, unknown>>(
   obj: T,
-  keys: (keyof T)[]
+  keys: (keyof T)[],
 ): Partial<T> {
   const keySet = new Set(keys);
   const result: Partial<T> = {};
@@ -122,7 +122,7 @@ export function getAllPropertyKeys(target: object): string[] {
  */
 export function deepClone<T>(
   obj: T,
-  visited = new WeakMap<object, unknown>()
+  visited = new WeakMap<object, unknown>(),
 ): T {
   if (obj === null || typeof obj !== "object") return obj;
 

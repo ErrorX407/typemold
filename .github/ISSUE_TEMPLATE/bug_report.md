@@ -26,7 +26,7 @@ What actually happened.
 
 ## Environment
 
-- typemold version:
+- tmapper version:
 - Node.js version:
 - TypeScript version:
 - OS:

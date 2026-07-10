@@ -1,5 +1,5 @@
 /**
- * typemold - Core Mapper Tests
+ * tmapper - Core Mapper Tests
  */
 
 import "reflect-metadata";
@@ -258,7 +258,7 @@ describe("Mapper", () => {
   describe("createMapper factory", () => {
     it("should create a reusable mapper function", () => {
       const mapToUserDto = Mapper.createMapper<typeof userEntity, UserDto>(
-        UserDto
+        UserDto,
       );
 
       const result1 = mapToUserDto(userEntity);

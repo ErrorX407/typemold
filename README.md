@@ -1,10 +1,10 @@
-# typemold
+# tmapper
 
 A **lightweight**, **high-performance** object mapper for TypeScript & Node.js with runtime field projection.
 
-[![npm version](https://img.shields.io/npm/v/typemold.svg)](https://www.npmjs.com/package/typemold)
+[![npm version](https://img.shields.io/npm/v/tmapper.svg)](https://www.npmjs.com/package/tmapper)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Downloads](https://img.shields.io/npm/dm/typemold.svg)](https://www.npmjs.com/package/typemold)
+[![Downloads](https://img.shields.io/npm/dm/tmapper.svg)](https://www.npmjs.com/package/tmapper)
 
 ## Features
 
@@ -23,12 +23,12 @@ A **lightweight**, **high-performance** object mapper for TypeScript & Node.js w
 ### Node.js / Express / Fastify
 
 ```bash
-npm install typemold reflect-metadata
+npm install tmapper reflect-metadata
 ```
 
 ```typescript
 // Usage
-import { Mapper, AutoMap, MapFrom } from "typemold";
+import { Mapper, AutoMap, MapFrom } from "tmapper";
 ```
 
 ---
@@ -36,15 +36,15 @@ import { Mapper, AutoMap, MapFrom } from "typemold";
 ### NestJS
 
 ```bash
-npm install typemold reflect-metadata
+npm install tmapper reflect-metadata
 ```
 
 ```typescript
 // Core decorators & Mapper
-import { Mapper, AutoMap, MapFrom } from "typemold";
+import { Mapper, AutoMap, MapFrom } from "tmapper";
 
 // NestJS module & service (separate subpath)
-import { MapperModule, MapperService } from "typemold/nestjs";
+import { MapperModule, MapperService } from "tmapper/nestjs";
 ```
 
 > **Note:** NestJS integration requires `@nestjs/common` and `@nestjs/core` (usually already installed in NestJS projects).
@@ -56,7 +56,7 @@ import { MapperModule, MapperService } from "typemold/nestjs";
 ### 1. Define Your DTO
 
 ```typescript
-import { AutoMap, MapFrom, FieldGroup } from "typemold";
+import { AutoMap, MapFrom, FieldGroup } from "tmapper";
 
 class UserDto {
   @AutoMap()
@@ -76,7 +76,7 @@ class UserDto {
 ### 2. Map Objects
 
 ```typescript
-import { Mapper } from "typemold";
+import { Mapper } from "tmapper";
 
 // Basic mapping
 const userDto = Mapper.map(userEntity, UserDto);
@@ -157,13 +157,13 @@ Mapper.group(user, UserDto, "full"); // { bio, email }
 
 ## 🔧 NestJS Integration
 
-> Import from `typemold/nestjs`
+> Import from `tmapper/nestjs`
 
 ### Setup
 
 ```typescript
 import { Module } from "@nestjs/common";
-import { MapperModule } from "typemold/nestjs";
+import { MapperModule } from "tmapper/nestjs";
 
 @Module({
   imports: [MapperModule.forRoot()],
@@ -175,7 +175,7 @@ export class AppModule {}
 
 ```typescript
 import { Injectable } from "@nestjs/common";
-import { MapperService } from "typemold/nestjs";
+import { MapperService } from "tmapper/nestjs";
 
 @Injectable()
 export class UserService {
@@ -209,7 +209,7 @@ MapperModule.forRootAsync({
 
 ## ⚡ Performance
 
-| Operation    | typemold   | @automapper/nestjs | Manual   |
+| Operation    | tmapper    | @automapper/nestjs | Manual   |
 | ------------ | ---------- | ------------------ | -------- |
 | Single map   | ~0.002ms   | ~0.05ms            | ~0.001ms |
 | Array (1000) | ~1.5ms     | ~40ms              | ~1ms     |

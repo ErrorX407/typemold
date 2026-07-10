@@ -1,5 +1,5 @@
 /**
- * typemold - NestJS Integration
+ * tmapper - NestJS Integration
  * Re-exports for NestJS-specific functionality
  */
 

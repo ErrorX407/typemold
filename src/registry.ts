@@ -1,5 +1,5 @@
 /**
- * typemold - Mapping Registry
+ * tmapper - Mapping Registry
  * Singleton registry for storing and caching mapping configurations
  */
 
@@ -29,7 +29,7 @@ class MappingRegistryClass {
    * Gets or creates a registry entry for a target DTO class
    */
   getEntry<TTarget>(
-    targetType: Constructor<TTarget>
+    targetType: Constructor<TTarget>,
   ): MappingRegistryEntry<unknown, TTarget> {
     let entry = this.registry.get(targetType);
 
@@ -45,7 +45,7 @@ class MappingRegistryClass {
    * Creates a mapping entry by reading decorator metadata
    */
   private createEntryFromMetadata<TTarget>(
-    targetType: Constructor<TTarget>
+    targetType: Constructor<TTarget>,
   ): MappingRegistryEntry<unknown, TTarget> {
     const propertyMappings: Map<string, PropertyMappingConfig> =
       Reflect.getMetadata(METADATA_KEYS.PROPERTY_MAPPINGS, targetType) ||
@@ -53,7 +53,7 @@ class MappingRegistryClass {
 
     const fieldGroups: Map<string, Set<string>> = Reflect.getMetadata(
       METADATA_KEYS.FIELD_GROUPS,
-      targetType
+      targetType,
     ) || new Map();
 
     return {
@@ -68,7 +68,7 @@ class MappingRegistryClass {
    */
   getCompiledMapper<TSource, TTarget>(
     targetType: Constructor<TTarget>,
-    optionsKey: string = "default"
+    optionsKey: string = "default",
   ): CompiledMapper<TSource, TTarget> | undefined {
     const typeMappers = this.compiledMappers.get(targetType);
     return typeMappers?.get(optionsKey);
@@ -80,7 +80,7 @@ class MappingRegistryClass {
   setCompiledMapper<TSource, TTarget>(
     targetType: Constructor<TTarget>,
     optionsKey: string,
-    mapper: CompiledMapper<TSource, TTarget>
+    mapper: CompiledMapper<TSource, TTarget>,
   ): void {
     let typeMappers = this.compiledMappers.get(targetType);
     if (!typeMappers) {
@@ -123,7 +123,7 @@ export class MapperFactory {
    */
   static createMapper<TSource, TTarget>(
     targetType: Constructor<TTarget>,
-    options?: MapOptions<TTarget>
+    options?: MapOptions<TTarget>,
   ): CompiledMapper<TSource, TTarget> {
     const entry = MappingRegistry.getEntry(targetType);
     const optionsKey = MappingRegistry.getOptionsKey(options);
@@ -131,7 +131,7 @@ export class MapperFactory {
     // Check cache first
     let compiledMapper = MappingRegistry.getCompiledMapper<TSource, TTarget>(
       targetType,
-      optionsKey
+      optionsKey,
     );
 
     if (compiledMapper) {
@@ -145,7 +145,7 @@ export class MapperFactory {
     compiledMapper = this.buildMapper<TSource, TTarget>(
       targetType,
       entry,
-      propertiesToMap
+      propertiesToMap,
     );
 
     // Cache for reuse
@@ -159,10 +159,10 @@ export class MapperFactory {
    */
   private static getPropertiesToMap<TTarget>(
     entry: MappingRegistryEntry<unknown, TTarget>,
-    options?: MapOptions<TTarget>
+    options?: MapOptions<TTarget>,
   ): PropertyMappingConfig[] {
     const allConfigs = Array.from(entry.propertyConfigs.values()).filter(
-      (config) => !config.ignore
+      (config) => !config.ignore,
     );
 
     if (!options) {
@@ -199,7 +199,7 @@ export class MapperFactory {
   private static buildMapper<TSource, TTarget>(
     targetType: Constructor<TTarget>,
     entry: MappingRegistryEntry<unknown, TTarget>,
-    properties: PropertyMappingConfig[]
+    properties: PropertyMappingConfig[],
   ): CompiledMapper<TSource, TTarget> {
     // Separate transform functions from path mappings for optimization
     const pathMappings: Array<{ target: string; source: string }> = [];
@@ -214,7 +214,7 @@ export class MapperFactory {
           target: prop.targetKey,
           transform: prop.source as (
             src: TSource,
-            ctx?: MappingContext
+            ctx?: MappingContext,
           ) => unknown,
         });
       } else {
@@ -239,7 +239,7 @@ export class MapperFactory {
         const mapping = pathMappings[i];
         result[mapping.target] = getNestedValue(
           source as Record<string, unknown>,
-          mapping.source
+          mapping.source,
         );
       }
 

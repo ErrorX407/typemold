@@ -1,5 +1,5 @@
 /**
- * typemold - Decorators
+ * tmapper - Decorators
  * Property decorators for defining mapping configurations
  */
 
@@ -37,14 +37,14 @@ import {
  * }
  */
 export function MapFrom<TSource = any>(
-  sourcePathOrTransform: PropertyPath | TransformFn<TSource>
+  sourcePathOrTransform: PropertyPath | TransformFn<TSource>,
 ): PropertyDecorator {
   return (target: Object, propertyKey: string | symbol) => {
     const key = String(propertyKey);
     const existingMappings: Map<string, PropertyMappingConfig> =
       Reflect.getMetadata(
         METADATA_KEYS.PROPERTY_MAPPINGS,
-        target.constructor
+        target.constructor,
       ) || new Map();
 
     const existingConfig =
@@ -62,7 +62,7 @@ export function MapFrom<TSource = any>(
     Reflect.defineMetadata(
       METADATA_KEYS.PROPERTY_MAPPINGS,
       existingMappings,
-      target.constructor
+      target.constructor,
     );
   };
 }
@@ -91,7 +91,7 @@ export function MapFrom<TSource = any>(
  * const dto = Mapper.mapWith(user, toUserDto);
  */
 export function createMapping<TSource, TTarget>(
-  mappings: TypedMappingConfig<TSource, TTarget>
+  mappings: TypedMappingConfig<TSource, TTarget>,
 ): (source: TSource) => Partial<TTarget> {
   return (source: TSource): Partial<TTarget> => {
     const result = {} as Record<string, unknown>;
@@ -102,7 +102,7 @@ export function createMapping<TSource, TTarget>(
       } else {
         result[targetKey] = getNestedValueTyped(
           source,
-          sourcePathOrFn as string
+          sourcePathOrFn as string,
         );
       }
     }
@@ -144,12 +144,12 @@ function getNestedValueTyped(obj: unknown, path: string): unknown {
 export type PathsOf<T, Depth extends number = 3> = Depth extends 0
   ? never
   : T extends object
-  ? {
-      [K in keyof T & string]: T[K] extends object
-        ? K | `${K}.${PathsOf<T[K], Prev[Depth]>}`
-        : K;
-    }[keyof T & string]
-  : never;
+    ? {
+        [K in keyof T & string]: T[K] extends object
+          ? K | `${K}.${PathsOf<T[K], Prev[Depth]>}`
+          : K;
+      }[keyof T & string]
+    : never;
 
 // Helper type for depth limiting (prevents infinite recursion)
 type Prev = [never, 0, 1, 2, 3];
@@ -169,7 +169,7 @@ export function AutoMap(): PropertyDecorator {
     const existingMappings: Map<string, PropertyMappingConfig> =
       Reflect.getMetadata(
         METADATA_KEYS.PROPERTY_MAPPINGS,
-        target.constructor
+        target.constructor,
       ) || new Map();
 
     const existingConfig =
@@ -181,13 +181,13 @@ export function AutoMap(): PropertyDecorator {
     Reflect.defineMetadata(
       METADATA_KEYS.PROPERTY_MAPPINGS,
       existingMappings,
-      target.constructor
+      target.constructor,
     );
     Reflect.defineMetadata(
       METADATA_KEYS.AUTO_MAP,
       true,
       target.constructor,
-      key
+      key,
     );
   };
 }
@@ -219,7 +219,7 @@ export function FieldGroup(...groups: string[]): PropertyDecorator {
     const existingMappings: Map<string, PropertyMappingConfig> =
       Reflect.getMetadata(
         METADATA_KEYS.PROPERTY_MAPPINGS,
-        target.constructor
+        target.constructor,
       ) || new Map();
 
     const existingConfig =
@@ -230,13 +230,13 @@ export function FieldGroup(...groups: string[]): PropertyDecorator {
     Reflect.defineMetadata(
       METADATA_KEYS.PROPERTY_MAPPINGS,
       existingMappings,
-      target.constructor
+      target.constructor,
     );
 
     // Also store in field groups map for quick lookup
     const fieldGroups: Map<string, Set<string>> = Reflect.getMetadata(
       METADATA_KEYS.FIELD_GROUPS,
-      target.constructor
+      target.constructor,
     ) || new Map();
 
     for (const group of groups) {
@@ -248,7 +248,7 @@ export function FieldGroup(...groups: string[]): PropertyDecorator {
     Reflect.defineMetadata(
       METADATA_KEYS.FIELD_GROUPS,
       fieldGroups,
-      target.constructor
+      target.constructor,
     );
   };
 }
@@ -353,7 +353,7 @@ export function Ignore(): PropertyDecorator {
     const existingMappings: Map<string, PropertyMappingConfig> =
       Reflect.getMetadata(
         METADATA_KEYS.PROPERTY_MAPPINGS,
-        target.constructor
+        target.constructor,
       ) || new Map();
 
     const existingConfig =
@@ -364,7 +364,7 @@ export function Ignore(): PropertyDecorator {
     Reflect.defineMetadata(
       METADATA_KEYS.PROPERTY_MAPPINGS,
       existingMappings,
-      target.constructor
+      target.constructor,
     );
     Reflect.defineMetadata(METADATA_KEYS.IGNORE, true, target.constructor, key);
   };
@@ -381,14 +381,14 @@ export function Ignore(): PropertyDecorator {
  * }
  */
 export function NestedType<T>(
-  typeFactory: () => Constructor<T>
+  typeFactory: () => Constructor<T>,
 ): PropertyDecorator {
   return (target: Object, propertyKey: string | symbol) => {
     Reflect.defineMetadata(
       METADATA_KEYS.NESTED_TYPE,
       typeFactory,
       target.constructor,
-      String(propertyKey)
+      String(propertyKey),
     );
   };
 }
