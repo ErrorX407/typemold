@@ -1,11 +1,11 @@
 /**
- * tremap - Node.js Quickstart Example
+ * typeblend - Node.js Quickstart Example
  *
  * Run: npx ts-node examples/node-quickstart.ts
  */
 
 import "reflect-metadata";
-import { Mapper, AutoMap, MapFrom, FieldGroup, Groups } from "tremap";
+import { Mapper, AutoMap, MapFrom, FieldGroup, Groups } from "typeblend";
 
 // Define your DTO with decorators
 class UserDto {
@@ -40,7 +40,7 @@ const userEntity = {
   },
 };
 
-console.log("=== tremap Node.js Examples ===\n");
+console.log("=== typeblend Node.js Examples ===\n");
 
 // 1. Full mapping
 console.log("1. Full mapping:");

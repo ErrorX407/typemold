@@ -1,5 +1,5 @@
 /**
- * tremap - Type Definitions
+ * typeblend - Type Definitions
  * Core types for the high-performance object mapper
  */
 

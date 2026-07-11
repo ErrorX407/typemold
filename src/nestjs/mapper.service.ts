@@ -1,5 +1,5 @@
 /**
- * tremap - NestJS MapperService
+ * typeblend - NestJS MapperService
  * Injectable service for NestJS dependency injection
  */
 
@@ -44,7 +44,7 @@ export interface MapperServiceOptions {
  */
 export class MappingValidationError extends Error {
   constructor(public readonly errors: unknown[]) {
-    super(`tremap: mapped object failed validation (${errors.length} error(s))`);
+    super(`typeblend: mapped object failed validation (${errors.length} error(s))`);
     this.name = "MappingValidationError";
     // Restore prototype chain for instanceof across transpile targets.
     Object.setPrototypeOf(this, MappingValidationError.prototype);
@@ -118,7 +118,7 @@ export class MapperService {
         .then((m) => ({ validate: m.validate }) as ClassValidator)
         .catch(() => {
           console.warn(
-            "[tremap] class-validator not found. Validation will be skipped.",
+            "[typeblend] class-validator not found. Validation will be skipped.",
           );
           return null;
         });

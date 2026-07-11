@@ -32,9 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **BREAKING (rename):** the package was renamed **`tmapper` → `tremap`** (the
+- **BREAKING (rename):** the package was renamed **`tmapper` → `typeblend`** (the
   `tmapper` name is taken on other registries). Update imports from `tmapper` to
-  `tremap`, and the NestJS subpath from `tmapper/nestjs` to `tremap/nestjs`. No
+  `typeblend`, and the NestJS subpath from `tmapper/nestjs` to `typeblend/nestjs`. No
   runtime API changed as part of the rename.
 - **BREAKING (behavioral):** `pick: []` now returns **no** fields (previously
   returned all fields). `omit: []` continues to return all fields. Projection
@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial release (published as `tmapper`; renamed to `tremap` in 3.1.0)
+- Initial release (published as `tmapper`; renamed to `typeblend` in 3.1.0)
 - Core `Mapper` class with `map()`, `mapArray()`, `pick()`, `omit()`, `group()` methods
 - Decorators: `@MapFrom()`, `@AutoMap()`, `@FieldGroup()`, `@Ignore()`, `@NestedType()`
 - Runtime field projection with pick/omit options

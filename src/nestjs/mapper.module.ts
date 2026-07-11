@@ -1,5 +1,5 @@
 /**
- * tremap - NestJS MapperModule
+ * typeblend - NestJS MapperModule
  * Dynamic module for NestJS integration
  */
 
@@ -56,7 +56,7 @@ export interface MapperModuleAsyncOptions {
 }
 
 /**
- * NestJS Module for tremap
+ * NestJS Module for typeblend
  *
  * @example
  * // Basic usage (global by default)

@@ -1,5 +1,5 @@
 /**
- * tremap - Mapping Registry
+ * typeblend - Mapping Registry
  * Singleton registry for storing and caching mapping configurations
  */
 

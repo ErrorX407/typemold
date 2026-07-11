@@ -1,5 +1,5 @@
 /**
- * tremap - Utility Functions
+ * typeblend - Utility Functions
  * Helper functions for the mapping engine
  */
 

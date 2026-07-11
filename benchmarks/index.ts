@@ -1,10 +1,10 @@
 /**
- * tremap - Benchmark harness
+ * typeblend - Benchmark harness
  *
  * Run with: npm run benchmark
  *
  * These numbers are machine-dependent. The goal is to give a reproducible way
- * to measure tremap on YOUR hardware rather than to assert absolute figures.
+ * to measure typeblend on YOUR hardware rather than to assert absolute figures.
  */
 
 import "reflect-metadata";
@@ -48,7 +48,7 @@ function time(label: string, iterations: number, fn: () => void): void {
 }
 
 function run(): void {
-  console.log("tremap benchmarks (results are machine-dependent)\n");
+  console.log("typeblend benchmarks (results are machine-dependent)\n");
 
   const single = makeUser(1);
   time("single map()", 1_000_000, () => {

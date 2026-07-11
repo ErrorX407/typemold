@@ -26,7 +26,7 @@ What actually happened.
 
 ## Environment
 
-- tremap version:
+- typeblend version:
 - Node.js version:
 - TypeScript version:
 - OS:
