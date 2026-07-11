@@ -26,7 +26,7 @@ What actually happened.
 
 ## Environment
 
-- tmapper version:
+- tremap version:
 - Node.js version:
 - TypeScript version:
 - OS:

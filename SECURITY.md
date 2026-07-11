@@ -9,7 +9,7 @@
 
 ## Reporting a Vulnerability
 
-We take security issues seriously. If you discover a security vulnerability in **tmapper**, please report it responsibly.
+We take security issues seriously. If you discover a security vulnerability in **tremap**, please report it responsibly.
 
 ### How to Report
 
@@ -34,14 +34,14 @@ We take security issues seriously. If you discover a security vulnerability in *
 
 ## Security Best Practices for Users
 
-- Always use the latest version of `tmapper`.
+- Always use the latest version of `tremap`.
 - Regularly run `npm audit` to check for vulnerabilities in your dependencies.
 - Review your DTO decorators to ensure no sensitive data is inadvertently exposed.
 
 ## Scope
 
-This policy applies to the `tmapper` npm package and its official GitHub repository.
+This policy applies to the `tremap` npm package and its official GitHub repository.
 
 ---
 
-Thank you for helping keep **tmapper** secure! 🔐
+Thank you for helping keep **tremap** secure! 🔐

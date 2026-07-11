@@ -1,5 +1,5 @@
 /**
- * tmapper - Core Mapper
+ * tremap - Core Mapper
  * Main mapper class with static methods for easy usage
  */
 
@@ -10,7 +10,6 @@ import {
   MappingContext,
   CompiledMapper,
   TypeConverter,
-  METADATA_KEYS,
 } from "./types";
 import { MapperFactory, MappingRegistry } from "./registry";
 
@@ -63,6 +62,7 @@ export class Mapper {
       extras: options?.extras,
       depth: 0,
       visited: new WeakMap(),
+      converters: this.typeConverters,
     };
 
     return mapper(source, context);
@@ -94,6 +94,7 @@ export class Mapper {
       extras: options?.extras,
       depth: 0,
       visited: new WeakMap(),
+      converters: this.typeConverters,
     };
 
     const result: TTarget[] = new Array(sources.length);
@@ -168,12 +169,18 @@ export class Mapper {
       targetType,
       options,
     );
-    const context: MappingContext = {
-      ...this.globalContext,
-      extras: options?.extras,
-    };
 
-    return (source: TSource) => compiledMapper(source, context);
+    // Build a fresh context per call so cycle-detection (visited) state is not
+    // shared across invocations of the reusable mapper (avoids a memory leak
+    // and cross-object interference).
+    return (source: TSource) =>
+      compiledMapper(source, {
+        ...this.globalContext,
+        extras: options?.extras,
+        depth: 0,
+        visited: new WeakMap(),
+        converters: this.typeConverters,
+      });
   }
 
   /**

@@ -1,5 +1,5 @@
 /**
- * tmapper - Utility Functions
+ * tremap - Utility Functions
  * Helper functions for the mapping engine
  */
 

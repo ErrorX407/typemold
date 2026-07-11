@@ -1,5 +1,5 @@
 /**
- * tmapper - Type Definitions
+ * tremap - Type Definitions
  * Core types for the high-performance object mapper
  */
 
@@ -35,6 +35,8 @@ export interface PropertyMappingConfig {
   groups: string[];
   /** Whether to ignore this property */
   ignore: boolean;
+  /** Factory for the nested target type (set by @NestedType) */
+  nestedType?: () => Constructor;
 }
 
 /**
@@ -55,6 +57,10 @@ export interface MappingContext {
   depth?: number;
   /** Already mapped objects for circular reference handling */
   visited?: WeakMap<object, unknown>;
+  /** Type converters applied to path-mapped values */
+  converters?: TypeConverter[];
+  /** Hard ceiling on nested recursion depth (safety net) */
+  maxDepth?: number;
 }
 
 /**
