@@ -1,5 +1,5 @@
 /**
- * tremap - NestJS Integration
+ * typeblend - NestJS Integration
  * Re-exports for NestJS-specific functionality
  */
 

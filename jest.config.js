@@ -10,7 +10,7 @@ module.exports = {
     }],
   },
   moduleNameMapper: {
-    '^tremap$': '<rootDir>/src/index.ts',
+    '^typeblend$': '<rootDir>/src/index.ts',
   },
   collectCoverageFrom: [
     'src/**/*.ts',

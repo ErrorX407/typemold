@@ -1,10 +1,10 @@
-# tremap
+# typeblend
 
 A **lightweight**, **high-performance** object mapper for TypeScript & Node.js with runtime field projection.
 
-[![npm version](https://img.shields.io/npm/v/tremap.svg)](https://www.npmjs.com/package/tremap)
+[![npm version](https://img.shields.io/npm/v/typeblend.svg)](https://www.npmjs.com/package/typeblend)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Downloads](https://img.shields.io/npm/dm/tremap.svg)](https://www.npmjs.com/package/tremap)
+[![Downloads](https://img.shields.io/npm/dm/typeblend.svg)](https://www.npmjs.com/package/typeblend)
 
 ## Features
 
@@ -23,12 +23,12 @@ A **lightweight**, **high-performance** object mapper for TypeScript & Node.js w
 ### Node.js / Express / Fastify
 
 ```bash
-npm install tremap reflect-metadata
+npm install typeblend reflect-metadata
 ```
 
 ```typescript
 // Usage
-import { Mapper, AutoMap, MapFrom } from "tremap";
+import { Mapper, AutoMap, MapFrom } from "typeblend";
 ```
 
 ---
@@ -36,15 +36,15 @@ import { Mapper, AutoMap, MapFrom } from "tremap";
 ### NestJS
 
 ```bash
-npm install tremap reflect-metadata
+npm install typeblend reflect-metadata
 ```
 
 ```typescript
 // Core decorators & Mapper
-import { Mapper, AutoMap, MapFrom } from "tremap";
+import { Mapper, AutoMap, MapFrom } from "typeblend";
 
 // NestJS module & service (separate subpath)
-import { MapperModule, MapperService } from "tremap/nestjs";
+import { MapperModule, MapperService } from "typeblend/nestjs";
 ```
 
 > **Note:** NestJS integration requires `@nestjs/common` and `@nestjs/core` (usually already installed in NestJS projects).
@@ -56,7 +56,7 @@ import { MapperModule, MapperService } from "tremap/nestjs";
 ### 1. Define Your DTO
 
 ```typescript
-import { AutoMap, MapFrom, FieldGroup } from "tremap";
+import { AutoMap, MapFrom, FieldGroup } from "typeblend";
 
 class UserDto {
   @AutoMap()
@@ -76,7 +76,7 @@ class UserDto {
 ### 2. Map Objects
 
 ```typescript
-import { Mapper } from "tremap";
+import { Mapper } from "typeblend";
 
 // Basic mapping
 const userDto = Mapper.map(userEntity, UserDto);
@@ -212,13 +212,13 @@ When multiple projection options are provided, they resolve in this order:
 
 ## 🔧 NestJS Integration
 
-> Import from `tremap/nestjs`
+> Import from `typeblend/nestjs`
 
 ### Setup
 
 ```typescript
 import { Module } from "@nestjs/common";
-import { MapperModule } from "tremap/nestjs";
+import { MapperModule } from "typeblend/nestjs";
 
 @Module({
   imports: [MapperModule.forRoot()],
@@ -230,7 +230,7 @@ export class AppModule {}
 
 ```typescript
 import { Injectable } from "@nestjs/common";
-import { MapperService } from "tremap/nestjs";
+import { MapperService } from "typeblend/nestjs";
 
 @Injectable()
 export class UserService {
@@ -264,7 +264,7 @@ MapperModule.forRootAsync({
 
 ## ⚡ Performance
 
-tremap compiles a mapper once per (DTO, projection) and caches it, so per-object
+typeblend compiles a mapper once per (DTO, projection) and caches it, so per-object
 mapping avoids runtime reflection. Exact numbers are hardware-dependent — run the
 included harness on your own machine:
 

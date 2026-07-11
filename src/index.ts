@@ -1,5 +1,5 @@
 /**
- * tremap
+ * typeblend
  * A lightweight, high-performance object mapper for TypeScript and Node.js
  *
  * @author Chetan Joshi
@@ -7,7 +7,7 @@
  *
  * @example
  * // Basic mapping
- * import { Mapper, MapFrom, AutoMap } from 'tremap';
+ * import { Mapper, MapFrom, AutoMap } from 'typeblend';
  *
  * class UserDto {
  *   @AutoMap()
@@ -29,8 +29,8 @@
  * const public = Mapper.map(user, UserDto, { group: 'public' });
  *
  * @example
- * // NestJS integration (import from 'tremap/nestjs')
- * import { MapperModule, MapperService } from 'tremap/nestjs';
+ * // NestJS integration (import from 'typeblend/nestjs')
+ * import { MapperModule, MapperService } from 'typeblend/nestjs';
  *
  * @Module({
  *   imports: [MapperModule.forRoot()],
@@ -82,5 +82,5 @@ export {
   isClassInstance,
 } from "./utils";
 
-// NOTE: NestJS integration is available via 'tremap/nestjs' subpath
-// import { MapperModule, MapperService } from 'tremap/nestjs';
+// NOTE: NestJS integration is available via 'typeblend/nestjs' subpath
+// import { MapperModule, MapperService } from 'typeblend/nestjs';

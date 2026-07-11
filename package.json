@@ -1,5 +1,5 @@
 {
-  "name": "tremap",
+  "name": "typeblend",
   "version": "3.1.0",
   "description": "A lightweight, high-performance object mapper for TypeScript and Node.js with runtime field projection",
   "author": {
@@ -53,12 +53,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ErrorX407/tremap.git"
+    "url": "git+https://github.com/ErrorX407/typeblend.git"
   },
   "bugs": {
-    "url": "https://github.com/ErrorX407/tremap/issues"
+    "url": "https://github.com/ErrorX407/typeblend/issues"
   },
-  "homepage": "https://github.com/ErrorX407/tremap#readme",
+  "homepage": "https://github.com/ErrorX407/typeblend#readme",
   "peerDependencies": {
     "@nestjs/common": ">=9.0.0",
     "@nestjs/core": ">=9.0.0",

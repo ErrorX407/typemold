@@ -1,5 +1,5 @@
 /**
- * tremap - NestJS MapperService Tests (Sprint 3)
+ * typeblend - NestJS MapperService Tests (Sprint 3)
  */
 
 import "reflect-metadata";

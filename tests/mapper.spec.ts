@@ -1,5 +1,5 @@
 /**
- * tremap - Core Mapper Tests
+ * typeblend - Core Mapper Tests
  */
 
 import "reflect-metadata";

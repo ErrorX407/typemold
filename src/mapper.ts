@@ -1,5 +1,5 @@
 /**
- * tremap - Core Mapper
+ * typeblend - Core Mapper
  * Main mapper class with static methods for easy usage
  */
 

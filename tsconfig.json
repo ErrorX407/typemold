@@ -15,7 +15,7 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "tremap": ["./src/index.ts"]
+      "typeblend": ["./src/index.ts"]
     }
   },
   "include": ["src/**/*", "tests/**/*", "examples/**/*"],

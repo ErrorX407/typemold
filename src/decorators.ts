@@ -1,5 +1,5 @@
 /**
- * tremap - Decorators
+ * typeblend - Decorators
  * Property decorators for defining mapping configurations
  */
 
