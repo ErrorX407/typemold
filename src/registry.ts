@@ -1,5 +1,5 @@
 /**
- * tmapper - Mapping Registry
+ * tremap - Mapping Registry
  * Singleton registry for storing and caching mapping configurations
  */
 
@@ -12,15 +12,18 @@ import {
   METADATA_KEYS,
   MapOptions,
   MappingContext,
+  TypeConverter,
 } from "./types";
-import { getNestedValue, pickKeys, omitKeys } from "./utils";
+import { getNestedValue } from "./utils";
 
 /**
  * Global mapping registry - singleton pattern for performance
  */
 class MappingRegistryClass {
   private readonly registry = new Map<Constructor, MappingRegistryEntry>();
-  private readonly compiledMappers = new WeakMap<
+  // NOTE: intentionally a Map (not WeakMap) so clearCache() can invalidate
+  // compiled mappers. Constructors are long-lived, so retention is a non-issue.
+  private readonly compiledMappers = new Map<
     Constructor,
     Map<string, CompiledMapper>
   >();
@@ -55,6 +58,19 @@ class MappingRegistryClass {
       METADATA_KEYS.FIELD_GROUPS,
       targetType,
     ) || new Map();
+
+    // Attach @NestedType factories (stored per-property) onto each config so
+    // the compiled mapper can recurse into nested DTOs.
+    for (const config of propertyMappings.values()) {
+      const nestedType = Reflect.getMetadata(
+        METADATA_KEYS.NESTED_TYPE,
+        targetType,
+        config.targetKey,
+      ) as (() => Constructor) | undefined;
+      if (nestedType) {
+        config.nestedType = nestedType;
+      }
+    }
 
     return {
       targetType,
@@ -91,20 +107,31 @@ class MappingRegistryClass {
   }
 
   /**
-   * Clears all cached mappers (useful for testing)
+   * Clears all cached mappers and metadata entries (useful for testing and
+   * hot-reload). Must invalidate BOTH caches, otherwise a re-read of metadata
+   * would still return a stale compiled mapper.
    */
   clearCache(): void {
     this.registry.clear();
+    this.compiledMappers.clear();
   }
 
   /**
-   * Generates a cache key for mapping options
+   * Generates a stable, collision-resistant cache key for mapping options.
+   *
+   * Precedence (must match getPropertiesToMap): group > pick > omit.
+   * Field names are JSON-encoded so that e.g. ['a','b'] and ['a,b'] cannot
+   * collide, and a copy is sorted so we never mutate the caller's array.
    */
   getOptionsKey<TTarget>(options?: MapOptions<TTarget>): string {
     if (!options) return "default";
-    if (options.pick) return `pick:${options.pick.sort().join(",")}`;
-    if (options.omit) return `omit:${options.omit.sort().join(",")}`;
     if (options.group) return `group:${options.group}`;
+    if (options.pick) {
+      return `pick:${JSON.stringify([...options.pick].map(String).sort())}`;
+    }
+    if (options.omit) {
+      return `omit:${JSON.stringify([...options.omit].map(String).sort())}`;
+    }
     return "default";
   }
 }
@@ -169,6 +196,8 @@ export class MapperFactory {
       return allConfigs;
     }
 
+    // Precedence (must match getOptionsKey): group > pick > omit.
+
     // Field group selection
     if (options.group) {
       const groupFields = entry.fieldGroups.get(options.group);
@@ -178,14 +207,14 @@ export class MapperFactory {
       return []; // Group not found, return empty
     }
 
-    // Pick specific fields
-    if (options.pick && options.pick.length > 0) {
+    // Pick specific fields. An explicit empty array means "no fields".
+    if (options.pick !== undefined) {
       const pickSet = new Set(options.pick.map(String));
       return allConfigs.filter((config) => pickSet.has(config.targetKey));
     }
 
-    // Omit specific fields
-    if (options.omit && options.omit.length > 0) {
+    // Omit specific fields. An explicit empty array means "all fields".
+    if (options.omit !== undefined) {
       const omitSet = new Set(options.omit.map(String));
       return allConfigs.filter((config) => !omitSet.has(config.targetKey));
     }
@@ -201,11 +230,16 @@ export class MapperFactory {
     entry: MappingRegistryEntry<unknown, TTarget>,
     properties: PropertyMappingConfig[],
   ): CompiledMapper<TSource, TTarget> {
-    // Separate transform functions from path mappings for optimization
+    // Separate mappings by kind for a tight per-object hot path.
     const pathMappings: Array<{ target: string; source: string }> = [];
     const transformMappings: Array<{
       target: string;
       transform: (src: TSource, ctx?: MappingContext) => unknown;
+    }> = [];
+    const nestedMappings: Array<{
+      target: string;
+      source: string;
+      typeFactory: () => Constructor;
     }> = [];
 
     for (const prop of properties) {
@@ -216,6 +250,12 @@ export class MapperFactory {
             src: TSource,
             ctx?: MappingContext,
           ) => unknown,
+        });
+      } else if (prop.nestedType) {
+        nestedMappings.push({
+          target: prop.targetKey,
+          source: prop.source as string,
+          typeFactory: prop.nestedType,
         });
       } else {
         pathMappings.push({
@@ -231,15 +271,49 @@ export class MapperFactory {
         return null as unknown as TTarget;
       }
 
-      // Create new instance or plain object based on target type
+      // Circular-reference protection: return the already-mapped instance
+      // for a source object we are currently mapping.
+      const visited = context?.visited;
+      if (visited && typeof source === "object") {
+        const existing = visited.get(source as object);
+        if (existing !== undefined) {
+          return existing as TTarget;
+        }
+      }
+
       const result = new targetType() as Record<string, unknown>;
 
-      // Apply path mappings (optimized)
+      // Register BEFORE recursing so cycles resolve to this instance.
+      if (visited && typeof source === "object") {
+        visited.set(source as object, result);
+      }
+
+      const converters = context?.converters;
+
+      // Apply path mappings (optionally run through registered converters)
       for (let i = 0; i < pathMappings.length; i++) {
         const mapping = pathMappings[i];
-        result[mapping.target] = getNestedValue(
+        const value = getNestedValue(
           source as Record<string, unknown>,
           mapping.source,
+        );
+        result[mapping.target] =
+          converters && converters.length
+            ? applyConverters(value, converters)
+            : value;
+      }
+
+      // Apply nested-type mappings (recursive, cycle- and depth-safe)
+      for (let i = 0; i < nestedMappings.length; i++) {
+        const mapping = nestedMappings[i];
+        const raw = getNestedValue(
+          source as Record<string, unknown>,
+          mapping.source,
+        );
+        result[mapping.target] = mapNestedValue(
+          raw,
+          mapping.typeFactory,
+          context,
         );
       }
 
@@ -252,4 +326,61 @@ export class MapperFactory {
       return result as TTarget;
     };
   }
+}
+
+/** Default hard ceiling on nested recursion depth. */
+const DEFAULT_MAX_DEPTH = 100;
+
+/**
+ * Applies the first registered converter whose source type matches the value's
+ * runtime type. Precedence is caller order (first match wins).
+ */
+function applyConverters(value: unknown, converters: TypeConverter[]): unknown {
+  if (value == null) return value;
+  for (let i = 0; i < converters.length; i++) {
+    const c = converters[i];
+    const matches =
+      typeof c.sourceType === "function"
+        ? value instanceof (c.sourceType as Constructor)
+        : typeof value === c.sourceType;
+    if (matches) {
+      return c.convert(value);
+    }
+  }
+  return value;
+}
+
+/**
+ * Maps a raw source value to a nested DTO (or array of them), threading the
+ * mapping context so cycle detection and depth limiting work across levels.
+ */
+function mapNestedValue(
+  value: unknown,
+  typeFactory: () => Constructor,
+  context?: MappingContext,
+): unknown {
+  if (value == null) return value;
+
+  const depth = context?.depth ?? 0;
+  const maxDepth = context?.maxDepth ?? DEFAULT_MAX_DEPTH;
+  if (depth >= maxDepth) return value; // safety net against runaway recursion
+
+  const childContext: MappingContext = {
+    ...context,
+    depth: depth + 1,
+    visited: context?.visited ?? new WeakMap<object, unknown>(),
+  };
+
+  const nestedType = typeFactory();
+  const nestedMapper = MapperFactory.createMapper(nestedType);
+
+  if (Array.isArray(value)) {
+    const out = new Array(value.length);
+    for (let i = 0; i < value.length; i++) {
+      out[i] = value[i] == null ? value[i] : nestedMapper(value[i], childContext);
+    }
+    return out;
+  }
+
+  return nestedMapper(value, childContext);
 }

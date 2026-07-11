@@ -1,5 +1,5 @@
 /**
- * tmapper - Core Mapper Tests
+ * tremap - Core Mapper Tests
  */
 
 import "reflect-metadata";
@@ -11,6 +11,7 @@ import {
   MapFrom,
   Mapper,
   MappingRegistry,
+  NestedType,
   createMapping,
 } from "../src";
 
@@ -266,6 +267,203 @@ describe("Mapper", () => {
 
       expect(result1.username).toBe("john_doe");
       expect(result2.username).toBe("test");
+    });
+  });
+
+  describe("Sprint 1 — correctness fixes", () => {
+    it("clearCache() recompiles mappers (F4)", () => {
+      Mapper.map(userEntity, UserDto);
+      const before = Mapper.getCompiledMapper(UserDto);
+      expect(before).toBeDefined();
+
+      Mapper.clearCache();
+      // After a real clear, the compiled mapper must be gone...
+      expect(Mapper.getCompiledMapper(UserDto)).toBeUndefined();
+
+      // ...and a subsequent map must build a fresh (different) instance.
+      Mapper.map(userEntity, UserDto);
+      const after = Mapper.getCompiledMapper(UserDto);
+      expect(after).toBeDefined();
+      expect(after).not.toBe(before);
+    });
+
+    it("does not mutate the caller's pick array (F5)", () => {
+      const fields = ["email", "avatar", "username"] as (keyof UserDto)[];
+      const snapshot = [...fields];
+      Mapper.map(userEntity, UserDto, { pick: fields });
+      expect(fields).toEqual(snapshot); // order preserved, not sorted in place
+    });
+
+    it("does not collide on comma-containing field names (F6)", () => {
+      const k1 = MappingRegistry.getOptionsKey({ pick: ["a", "b"] as any });
+      const k2 = MappingRegistry.getOptionsKey({ pick: ["a,b"] as any });
+      expect(k1).not.toBe(k2);
+    });
+
+    it("pick: [] returns no fields (F7)", () => {
+      const result = Mapper.map(userEntity, UserDto, { pick: [] });
+      expect(Object.keys(result)).toHaveLength(0);
+    });
+
+    it("omit: [] returns all fields (F7)", () => {
+      const full = Mapper.map(userEntity, UserDto);
+      const result = Mapper.map(userEntity, UserDto, { omit: [] });
+      expect(Object.keys(result).sort()).toEqual(Object.keys(full).sort());
+    });
+
+    it("group takes precedence over pick/omit (F6)", () => {
+      const result = Mapper.map(userEntity, UserWithGroupsDto, {
+        group: "minimal",
+        pick: ["email"] as any,
+        omit: ["username"] as any,
+      });
+      expect(result.username).toBe("john_doe");
+      expect(result.email).toBeUndefined();
+    });
+  });
+
+  describe("Sprint 2 — nested mapping (F1)", () => {
+    class AddressDto {
+      @AutoMap()
+      city!: string;
+      @AutoMap()
+      zip!: string;
+    }
+
+    class CompanyDto {
+      @AutoMap()
+      name!: string;
+
+      @NestedType(() => AddressDto)
+      @MapFrom("address")
+      address!: AddressDto;
+    }
+
+    class TeamDto {
+      @AutoMap()
+      title!: string;
+
+      @NestedType(() => AddressDto)
+      @MapFrom("locations")
+      locations!: AddressDto[];
+    }
+
+    it("maps a single nested object into its DTO type", () => {
+      const src = {
+        name: "Acme",
+        address: { city: "Pune", zip: "411001", secret: "x" },
+      };
+      const result = Mapper.map(src, CompanyDto);
+      expect(result.address).toBeInstanceOf(AddressDto);
+      expect(result.address.city).toBe("Pune");
+      expect(result.address.zip).toBe("411001");
+      // fields not on the nested DTO are dropped
+      expect((result.address as any).secret).toBeUndefined();
+    });
+
+    it("maps arrays of nested objects element-wise", () => {
+      const src = {
+        title: "Eng",
+        locations: [
+          { city: "Pune", zip: "1" },
+          { city: "Delhi", zip: "2" },
+        ],
+      };
+      const result = Mapper.map(src, TeamDto);
+      expect(result.locations).toHaveLength(2);
+      expect(result.locations[0]).toBeInstanceOf(AddressDto);
+      expect(result.locations[1].city).toBe("Delhi");
+    });
+
+    it("passes null/undefined nested values through safely", () => {
+      const result = Mapper.map({ name: "Acme", address: null }, CompanyDto);
+      expect(result.address).toBeNull();
+    });
+  });
+
+  describe("Sprint 2 — circular references (F3)", () => {
+    class NodeDto {
+      @AutoMap()
+      id!: number;
+
+      @NestedType(() => NodeDto)
+      @MapFrom("next")
+      next!: NodeDto;
+    }
+
+    it("does not stack-overflow on a self-referential source", () => {
+      const a: any = { id: 1 };
+      const b: any = { id: 2, next: a };
+      a.next = b; // cycle a -> b -> a
+
+      const result = Mapper.map(a, NodeDto);
+      expect(result.id).toBe(1);
+      expect(result.next.id).toBe(2);
+      // the cycle resolves back to the same mapped instance
+      expect(result.next.next).toBe(result);
+    });
+  });
+
+  describe("Sprint 2 — type converters (F2)", () => {
+    class EventDto {
+      @AutoMap()
+      when!: string;
+    }
+
+    afterEach(() => {
+      // converters live on the static Mapper; reset via re-import isn't trivial,
+      // so we rely on distinct runtime types per test to avoid interference.
+    });
+
+    it("applies a registered converter to path-mapped values", () => {
+      Mapper.registerConverter({
+        sourceType: Date,
+        targetType: String,
+        convert: (d: Date) => d.toISOString(),
+      });
+
+      const iso = new Date("2024-01-01T00:00:00.000Z");
+      const result = Mapper.map({ when: iso }, EventDto);
+      expect(result.when).toBe("2024-01-01T00:00:00.000Z");
+    });
+  });
+
+  describe("Sprint 4 — edge cases & security guards", () => {
+    it("returns undefined for missing nested paths (no throw)", () => {
+      const result = Mapper.map({ username: "x" }, UserDto);
+      expect(result.avatar).toBeUndefined();
+    });
+
+    it("handles null nested containers without throwing", () => {
+      const result = Mapper.map({ username: "x", profile: null }, UserDto);
+      expect(result.avatar).toBeUndefined();
+    });
+
+    it("blocks prototype-pollution via mapped paths", () => {
+      class EvilDto {
+        @MapFrom("__proto__.polluted")
+        x!: unknown;
+      }
+      const src = JSON.parse('{"a":1}');
+      Mapper.map(src, EvilDto);
+      // global Object prototype must remain clean
+      expect(({} as any).polluted).toBeUndefined();
+    });
+
+    it("mapArray skips null elements, keeping positions", () => {
+      const result = Mapper.mapArray(
+        [userEntity, null as any, userEntity],
+        UserDto,
+      );
+      expect(result).toHaveLength(3);
+      expect(result[0].username).toBe("john_doe");
+      expect(result[1]).toBeNull();
+      expect(result[2].username).toBe("john_doe");
+    });
+
+    it("returns null (not throw) for a null single source", () => {
+      expect(Mapper.map(null, UserDto)).toBeNull();
+      expect(Mapper.map(undefined as any, UserDto)).toBeNull();
     });
   });
 

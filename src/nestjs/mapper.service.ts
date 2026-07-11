@@ -1,11 +1,16 @@
 /**
- * tmapper - NestJS MapperService
+ * tremap - NestJS MapperService
  * Injectable service for NestJS dependency injection
  */
 
 import { Injectable, Inject, Optional } from "@nestjs/common";
-import { Mapper } from "../mapper";
-import { Constructor, MapOptions, TypeConverter } from "../types";
+import { MapperFactory } from "../registry";
+import {
+  Constructor,
+  MapOptions,
+  MappingContext,
+  TypeConverter,
+} from "../types";
 
 /**
  * Injection token for MapperModule options
@@ -33,7 +38,29 @@ export interface MapperServiceOptions {
 }
 
 /**
- * Injectable mapper service for NestJS
+ * Thrown by {@link MapperService.mapAndValidate} when class-validator reports
+ * one or more validation errors. A proper Error subclass (not a raw array) so
+ * NestJS exception filters and stack traces behave correctly.
+ */
+export class MappingValidationError extends Error {
+  constructor(public readonly errors: unknown[]) {
+    super(`tremap: mapped object failed validation (${errors.length} error(s))`);
+    this.name = "MappingValidationError";
+    // Restore prototype chain for instanceof across transpile targets.
+    Object.setPrototypeOf(this, MappingValidationError.prototype);
+  }
+}
+
+type ClassValidator = {
+  validate: (obj: object) => Promise<unknown[]>;
+};
+
+/**
+ * Injectable mapper service for NestJS.
+ *
+ * Unlike the static {@link Mapper}, this service keeps its converters and
+ * global extras on the INSTANCE — it never mutates process-global state, so
+ * two independently-constructed services stay fully isolated.
  *
  * @example
  * @Injectable()
@@ -49,43 +76,54 @@ export interface MapperServiceOptions {
 @Injectable()
 export class MapperService {
   private readonly options: MapperServiceOptions;
-  private validator: { validate: (obj: object) => Promise<unknown[]> } | null =
-    null;
+  private readonly converters: TypeConverter[];
+  private readonly globalExtras: Record<string, unknown>;
+  private validatorPromise?: Promise<ClassValidator | null>;
 
   constructor(
     @Optional() @Inject(MAPPER_OPTIONS) options?: MapperServiceOptions,
   ) {
     this.options = options || {};
-
-    // Register custom converters if provided
-    if (this.options.converters) {
-      for (const converter of this.options.converters) {
-        Mapper.registerConverter(converter);
-      }
-    }
-
-    // Set global context if extras provided
-    if (this.options.globalExtras) {
-      Mapper.setGlobalContext({ extras: this.options.globalExtras });
-    }
-
-    // Try to load class-validator if validation is enabled
-    if (this.options.enableValidation) {
-      this.initializeValidator();
-    }
+    // Per-instance state — no mutation of the static Mapper singleton.
+    this.converters = this.options.converters
+      ? [...this.options.converters]
+      : [];
+    this.globalExtras = this.options.globalExtras
+      ? { ...this.options.globalExtras }
+      : {};
   }
 
   /**
-   * Lazily loads class-validator for hybrid integration
+   * Builds a fresh mapping context per call (instance converters + extras,
+   * plus cycle-detection state).
    */
-  private async initializeValidator(): Promise<void> {
-    try {
-      this.validator = await import("class-validator");
-    } catch {
-      console.warn(
-        "[tmapper] class-validator not found. Validation will be skipped.",
-      );
+  private buildContext<TTarget>(
+    options?: MapOptions<TTarget>,
+  ): MappingContext {
+    return {
+      extras: { ...this.globalExtras, ...options?.extras },
+      depth: 0,
+      visited: new WeakMap(),
+      converters: this.converters,
+    };
+  }
+
+  /**
+   * Lazily loads class-validator exactly once, awaited (never fire-and-forget).
+   * Returns null if the optional dependency is not installed.
+   */
+  private loadValidator(): Promise<ClassValidator | null> {
+    if (!this.validatorPromise) {
+      this.validatorPromise = import("class-validator")
+        .then((m) => ({ validate: m.validate }) as ClassValidator)
+        .catch(() => {
+          console.warn(
+            "[tremap] class-validator not found. Validation will be skipped.",
+          );
+          return null;
+        });
     }
+    return this.validatorPromise;
   }
 
   /**
@@ -96,7 +134,14 @@ export class MapperService {
     targetType: Constructor<TTarget>,
     options?: MapOptions<TTarget>,
   ): TTarget {
-    return Mapper.map(source, targetType, options);
+    if (source == null) {
+      return null as unknown as TTarget;
+    }
+    const mapper = MapperFactory.createMapper<TSource, TTarget>(
+      targetType,
+      options,
+    );
+    return mapper(source, this.buildContext(options));
   }
 
   /**
@@ -107,13 +152,29 @@ export class MapperService {
     targetType: Constructor<TTarget>,
     options?: MapOptions<TTarget>,
   ): TTarget[] {
-    return Mapper.mapArray(sources, targetType, options);
+    if (!sources || !Array.isArray(sources)) {
+      return [];
+    }
+    const mapper = MapperFactory.createMapper<TSource, TTarget>(
+      targetType,
+      options,
+    );
+    const result: TTarget[] = new Array(sources.length);
+    for (let i = 0; i < sources.length; i++) {
+      result[i] =
+        sources[i] != null
+          ? mapper(sources[i], this.buildContext(options))
+          : (null as unknown as TTarget);
+    }
+    return result;
   }
 
   /**
-   * Maps and validates the result using class-validator (if enabled)
+   * Maps and validates the result using class-validator (if enabled).
+   * Validation is deterministic: the validator load is awaited here, so it is
+   * never silently skipped due to an unresolved import.
    *
-   * @throws ValidationError[] if validation fails
+   * @throws {MappingValidationError} if validation fails
    */
   async mapAndValidate<TSource, TTarget extends object>(
     source: TSource,
@@ -122,10 +183,13 @@ export class MapperService {
   ): Promise<TTarget> {
     const result = this.map(source, targetType, options);
 
-    if (this.validator && this.options.enableValidation) {
-      const errors = await this.validator.validate(result);
-      if (errors.length > 0) {
-        throw errors;
+    if (this.options.enableValidation && result != null) {
+      const validator = await this.loadValidator();
+      if (validator) {
+        const errors = await validator.validate(result as object);
+        if (errors.length > 0) {
+          throw new MappingValidationError(errors);
+        }
       }
     }
 
@@ -140,7 +204,9 @@ export class MapperService {
     targetType: Constructor<TTarget>,
     fields: K[],
   ): Pick<TTarget, K> {
-    return Mapper.pick(source, targetType, fields);
+    return this.map(source, targetType, {
+      pick: fields as (keyof TTarget)[],
+    }) as Pick<TTarget, K>;
   }
 
   /**
@@ -151,7 +217,9 @@ export class MapperService {
     targetType: Constructor<TTarget>,
     fields: K[],
   ): Omit<TTarget, K> {
-    return Mapper.omit(source, targetType, fields);
+    return this.map(source, targetType, {
+      omit: fields as (keyof TTarget)[],
+    }) as Omit<TTarget, K>;
   }
 
   /**
@@ -162,16 +230,24 @@ export class MapperService {
     targetType: Constructor<TTarget>,
     groupName: string,
   ): Partial<TTarget> {
-    return Mapper.group(source, targetType, groupName);
+    return this.map(source, targetType, { group: groupName });
   }
 
   /**
-   * Creates a reusable mapper function
+   * Creates a reusable mapper function. A fresh context is built per call so
+   * cycle-detection state is never shared across invocations.
    */
   createMapper<TSource, TTarget>(
     targetType: Constructor<TTarget>,
     options?: MapOptions<TTarget>,
   ): (source: TSource) => TTarget {
-    return Mapper.createMapper(targetType, options);
+    const mapper = MapperFactory.createMapper<TSource, TTarget>(
+      targetType,
+      options,
+    );
+    return (source: TSource) =>
+      source == null
+        ? (null as unknown as TTarget)
+        : mapper(source, this.buildContext(options));
   }
 }

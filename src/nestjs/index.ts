@@ -1,5 +1,5 @@
 /**
- * tmapper - NestJS Integration
+ * tremap - NestJS Integration
  * Re-exports for NestJS-specific functionality
  */
 
@@ -11,5 +11,6 @@ export {
 export {
   MapperService,
   MapperServiceOptions,
+  MappingValidationError,
   MAPPER_OPTIONS,
 } from "./mapper.service";

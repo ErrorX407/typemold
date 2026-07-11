@@ -1,10 +1,10 @@
-# tmapper
+# tremap
 
 A **lightweight**, **high-performance** object mapper for TypeScript & Node.js with runtime field projection.
 
-[![npm version](https://img.shields.io/npm/v/tmapper.svg)](https://www.npmjs.com/package/tmapper)
+[![npm version](https://img.shields.io/npm/v/tremap.svg)](https://www.npmjs.com/package/tremap)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Downloads](https://img.shields.io/npm/dm/tmapper.svg)](https://www.npmjs.com/package/tmapper)
+[![Downloads](https://img.shields.io/npm/dm/tremap.svg)](https://www.npmjs.com/package/tremap)
 
 ## Features
 
@@ -23,12 +23,12 @@ A **lightweight**, **high-performance** object mapper for TypeScript & Node.js w
 ### Node.js / Express / Fastify
 
 ```bash
-npm install tmapper reflect-metadata
+npm install tremap reflect-metadata
 ```
 
 ```typescript
 // Usage
-import { Mapper, AutoMap, MapFrom } from "tmapper";
+import { Mapper, AutoMap, MapFrom } from "tremap";
 ```
 
 ---
@@ -36,15 +36,15 @@ import { Mapper, AutoMap, MapFrom } from "tmapper";
 ### NestJS
 
 ```bash
-npm install tmapper reflect-metadata
+npm install tremap reflect-metadata
 ```
 
 ```typescript
 // Core decorators & Mapper
-import { Mapper, AutoMap, MapFrom } from "tmapper";
+import { Mapper, AutoMap, MapFrom } from "tremap";
 
 // NestJS module & service (separate subpath)
-import { MapperModule, MapperService } from "tmapper/nestjs";
+import { MapperModule, MapperService } from "tremap/nestjs";
 ```
 
 > **Note:** NestJS integration requires `@nestjs/common` and `@nestjs/core` (usually already installed in NestJS projects).
@@ -56,7 +56,7 @@ import { MapperModule, MapperService } from "tmapper/nestjs";
 ### 1. Define Your DTO
 
 ```typescript
-import { AutoMap, MapFrom, FieldGroup } from "tmapper";
+import { AutoMap, MapFrom, FieldGroup } from "tremap";
 
 class UserDto {
   @AutoMap()
@@ -76,7 +76,7 @@ class UserDto {
 ### 2. Map Objects
 
 ```typescript
-import { Mapper } from "tmapper";
+import { Mapper } from "tremap";
 
 // Basic mapping
 const userDto = Mapper.map(userEntity, UserDto);
@@ -142,6 +142,61 @@ Mapper.group(user, UserDto, "full"); // { bio, email }
 
 ---
 
+## 🧩 Nested Mapping
+
+Map nested objects (and arrays of them) into their own DTOs with `@NestedType`:
+
+```typescript
+class AddressDto {
+  @AutoMap() city: string;
+  @AutoMap() zip: string;
+}
+
+class CompanyDto {
+  @AutoMap() name: string;
+
+  @NestedType(() => AddressDto)
+  @MapFrom("address")
+  address: AddressDto; // deep-mapped into AddressDto
+
+  @NestedType(() => AddressDto)
+  @MapFrom("locations")
+  locations: AddressDto[]; // arrays are mapped element-wise
+}
+```
+
+Circular references are handled automatically (a revisited source resolves to the
+same mapped instance), with a safety ceiling on recursion depth.
+
+---
+
+## 🔁 Type Converters
+
+Register a converter to transform values by runtime type during mapping:
+
+```typescript
+Mapper.registerConverter({
+  sourceType: Date,
+  targetType: String,
+  convert: (d: Date) => d.toISOString(),
+});
+```
+
+**Precedence:** explicit `@MapFrom` transform → registered converter → raw value.
+
+> In NestJS, pass converters via `MapperModule.forRoot({ converters: [...] })` —
+> they are held **per-service instance**, never on global state.
+
+---
+
+## 🎛️ Projection precedence
+
+When multiple projection options are provided, they resolve in this order:
+**`group` → `pick` → `omit`**. Note: `pick: []` selects **no** fields, while
+`omit: []` selects **all** fields.
+
+---
+
 ## 🎨 Decorators
 
 | Decorator                 | Description                  | Example                                          |
@@ -157,13 +212,13 @@ Mapper.group(user, UserDto, "full"); // { bio, email }
 
 ## 🔧 NestJS Integration
 
-> Import from `tmapper/nestjs`
+> Import from `tremap/nestjs`
 
 ### Setup
 
 ```typescript
 import { Module } from "@nestjs/common";
-import { MapperModule } from "tmapper/nestjs";
+import { MapperModule } from "tremap/nestjs";
 
 @Module({
   imports: [MapperModule.forRoot()],
@@ -175,7 +230,7 @@ export class AppModule {}
 
 ```typescript
 import { Injectable } from "@nestjs/common";
-import { MapperService } from "tmapper/nestjs";
+import { MapperService } from "tremap/nestjs";
 
 @Injectable()
 export class UserService {
@@ -209,11 +264,18 @@ MapperModule.forRootAsync({
 
 ## ⚡ Performance
 
-| Operation    | tmapper    | @automapper/nestjs | Manual   |
-| ------------ | ---------- | ------------------ | -------- |
-| Single map   | ~0.002ms   | ~0.05ms            | ~0.001ms |
-| Array (1000) | ~1.5ms     | ~40ms              | ~1ms     |
-| Memory       | O(1) cache | O(n) profiles      | None     |
+tremap compiles a mapper once per (DTO, projection) and caches it, so per-object
+mapping avoids runtime reflection. Exact numbers are hardware-dependent — run the
+included harness on your own machine:
+
+```bash
+npm run benchmark
+```
+
+Indicative results (Node 20, Apple Silicon, sub-microsecond per single map;
+a 1000-element `mapArray` in well under a millisecond). The compiled-mapper cache
+is `O(1)` per (type, projection) — see [`benchmarks/index.ts`](./benchmarks/index.ts)
+to reproduce.
 
 ---
 

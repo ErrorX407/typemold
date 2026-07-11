@@ -15,7 +15,7 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "tmapper": ["./src/index.ts"]
+      "tremap": ["./src/index.ts"]
     }
   },
   "include": ["src/**/*", "tests/**/*", "examples/**/*"],

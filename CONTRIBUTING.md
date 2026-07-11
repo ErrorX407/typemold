@@ -1,12 +1,12 @@
-# Contributing to tmapper
+# Contributing to tremap
 
-Thank you for your interest in contributing to tmapper! 🎉
+Thank you for your interest in contributing to tremap! 🎉
 
 ## How to Contribute
 
 ### Reporting Bugs
 
-1. Check if the bug has already been reported in [Issues](https://github.com/sevirial/tmapper/issues)
+1. Check if the bug has already been reported in [Issues](https://github.com/sevirial/tremap/issues)
 2. If not, create a new issue with:
    - Clear title and description
    - Steps to reproduce
@@ -15,7 +15,7 @@ Thank you for your interest in contributing to tmapper! 🎉
 
 ### Suggesting Features
 
-1. Open a [Feature Request](https://github.com/sevirial/tmapper/issues/new?template=feature_request.md)
+1. Open a [Feature Request](https://github.com/sevirial/tremap/issues/new?template=feature_request.md)
 2. Describe the use case and proposed solution
 3. Wait for discussion before implementing
 
@@ -73,8 +73,8 @@ We follow [Conventional Commits](https://conventionalcommits.org/):
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/tmapper.git
-cd tmapper
+git clone https://github.com/YOUR_USERNAME/tremap.git
+cd tremap
 
 # Install dependencies
 npm install
@@ -88,4 +88,4 @@ npm run build
 
 ## Questions?
 
-Open a [Discussion](https://github.com/sevirial/tmapper/discussions) or reach out!
+Open a [Discussion](https://github.com/sevirial/tremap/discussions) or reach out!

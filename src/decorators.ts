@@ -1,5 +1,5 @@
 /**
- * tmapper - Decorators
+ * tremap - Decorators
  * Property decorators for defining mapping configurations
  */
 
@@ -83,12 +83,8 @@ export function MapFrom<TSource = any>(
  *   bio: src => src.profile.bio,     // ✨ Autocomplete for transforms!
  * });
  *
- * // Usage
+ * // Usage — the returned function IS the mapper; call it directly.
  * const dto = toUserDto(userEntity);
- *
- * @example
- * // Option 2: Use with Mapper
- * const dto = Mapper.mapWith(user, toUserDto);
  */
 export function createMapping<TSource, TTarget>(
   mappings: TypedMappingConfig<TSource, TTarget>,

@@ -1,5 +1,5 @@
 /**
- * tmapper - NestJS MapperModule
+ * tremap - NestJS MapperModule
  * Dynamic module for NestJS integration
  */
 
@@ -56,7 +56,7 @@ export interface MapperModuleAsyncOptions {
 }
 
 /**
- * NestJS Module for tmapper
+ * NestJS Module for tremap
  *
  * @example
  * // Basic usage (global by default)
